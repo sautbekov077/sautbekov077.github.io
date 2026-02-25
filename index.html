@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/png" href="favicon.png">
+    
+    <title>Studify.AI – ИИ-помощник для студентов Казахстана</title>
+    <meta name="description" content="Studify.AI – интеллектуальный онлайн-инструмент с искусственным интеллектом для студентов Казахстана. Помогает писать конспекты, разбирать темы и готовиться к экзаменам быстрее.">
+    
+    <meta property="og:title" content="Studify.AI – ИИ-помощник для студентов Казахстана">
+    <meta property="og:description" content="Studify.AI – интеллектуальный онлайн-инструмент с искусственным интеллектом для студентов Казахстана. Помогает писать конспекты, разбирать темы и готовиться к экзаменам быстрее.">
+    <meta property="og:type" content="website">
+
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary: #2BBFA7;
+            --primary-dark: #1F8F7E;
+            --primary-light: rgba(43, 191, 167, 0.15);
+            --bg: #F7FAF9;
+            --text-main: #1E1E1E;
+            --text-sec: #6B7280;
+            --white: #FFFFFF;
+        }
+
+        /* Base Styles */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+            overflow-x: hidden; /* Чтобы блюр-пятна не создавали скролл */
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        h1, h2, h3 {
+            margin-top: 0;
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        p {
+            color: var(--text-sec);
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* --- Background Blur Blobs Animation --- */
+        @keyframes float-blob-1 {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(80px, -50px) scale(1.1);
+            }
+            66% {
+                transform: translate(-40px, 60px) scale(0.95);
+            }
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        @keyframes float-blob-2 {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(-70px, 40px) scale(1.2);
+            }
+            66% {
+                transform: translate(50px, -60px) scale(0.9);
+            }
+            100% {
+                transform: translate(0, 0) scale(1);
+            }
+        }
+
+        /* Background Blur Blobs Styles */
+        .glow-blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px); /* Чуть уменьшил блюр для четкости движения */
+            z-index: -1;
+            opacity: 0.5; /* Немного уменьшил прозрачность, чтобы не перебивать контент */
+            will-change: transform; /* Оптимизация производительности */
+        }
+        
+        .glow-1 {
+            top: -150px;
+            left: -150px;
+            width: 500px;
+            height: 500px;
+            background: rgba(43, 191, 167, 0.5); /* Основной цвет, полупрозрачный */
+            animation: float-blob-1 25s infinite ease-in-out;
+        }
+
+        .glow-2 {
+            top: 400px;
+            right: -200px;
+            width: 600px;
+            height: 600px;
+            background: rgba(31, 143, 126, 0.4); /* Темный акцент, полупрозрачный */
+            animation: float-blob-2 30s infinite ease-in-out reverse;
+        }
+        /* --------------------------------------- */
+
+
+        /* Buttons */
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+            box-shadow: 0 4px 15px rgba(43, 191, 167, 0.3);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            box-shadow: 0 6px 20px rgba(43, 191, 167, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .btn-outline {
+            background-color: rgba(255,255,255, 0.5);
+            backdrop-filter: blur(4px);
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-outline:hover {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-white {
+            background-color: var(--white);
+            color: var(--primary);
+        }
+
+        /* Header & Navigation (Glassmorphism) */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+            z-index: 1000;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            height: 40px; /* Скорректировал высоту для хедера */
+            width: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+        }
+
+        .nav-links a.anchor {
+            font-weight: 500;
+            color: var(--text-main);
+            transition: color 0.3s;
+        }
+
+        .nav-links a.anchor:hover {
+            color: var(--primary);
+        }
+
+        /* Layout Structure */
+        main {
+            padding-top: 80px;
+        }
+
+        section {
+            padding: 100px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        /* Image Placeholders */
+        .image-placeholder {
+            background: linear-gradient(135deg, var(--primary-light), rgba(255,255,255,0.8));
+            border: 1px dashed var(--primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: bold;
+            width: 100%;
+            min-height: 350px;
+            backdrop-filter: blur(8px);
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+            padding-top: 120px;
+        }
+
+        .hero-text-block {
+            flex: 1;
+        }
+
+        .hero-image-block {
+            flex: 1;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        /* Место под логотип в заголовке */
+        .hero-logo-placeholder {
+            background-image: url('favicon.png');
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(43, 191, 167, 0.4);
+            
+        }
+
+        .hero .subtitle {
+            font-size: 1.25rem;
+            margin-bottom: 20px;
+            color: var(--text-sec);
+        }
+
+        .hero .additional-text {
+            font-size: 1rem;
+            margin-bottom: 40px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 16px;
+        }
+
+        /* About Section */
+        .about-content {
+            display: flex;
+            align-items: center;
+            gap: 60px;
+        }
+
+        .about-text {
+            flex: 1;
+        }
+
+        .about-image {
+            flex: 1;
+        }
+
+        /* Features Section */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+
+        .feature-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            padding: 32px 24px;
+            border-radius: 16px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.05);
+            border: 1px solid rgba(255, 255, 255, 1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 40px rgba(43, 191, 167, 0.1);
+        }
+
+        /* Место под иконки в карточках */
+        .icon-placeholder {
+            width: 40px;
+            height: 40px;
+            background-color: var(--primary-light);
+            border-radius: 10px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .feature-card h3 {
+            color: var(--text-main);
+            margin-bottom: 12px;
+            font-size: 1.2rem;
+        }
+
+        /* Lists formatting */
+        ul.styled-list {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        ul.styled-list li {
+            position: relative;
+            padding-left: 32px;
+            margin-bottom: 16px;
+            color: var(--text-sec);
+            font-size: 1.1rem;
+        }
+
+        ul.styled-list li::before {
+            content: "✦"; /* Заменили галочку на более стильный символ */
+            position: absolute;
+            left: 0;
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: 24px;
+            text-align: center;
+            padding: 80px 20px;
+            margin-bottom: 80px;
+            color: var(--white);
+            box-shadow: 0 20px 40px rgba(43, 191, 167, 0.2);
+        }
+
+        .cta-section h2 {
+            color: var(--white);
+            margin-bottom: 30px;
+            font-size: 2.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: var(--white);
+            text-align: center;
+            padding: 40px 20px;
+            border-top: 1px solid #eaeaea;
+        }
+
+        footer .logo-footer {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+
+        footer p {
+            margin: 4px 0;
+            font-size: 0.9rem;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 992px) {
+            .hero, .about-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 40px;
+            }
+            .hero h1 {
+                justify-content: center;
+            }
+            .hero-buttons {
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            .hero-buttons {
+                flex-direction: column;
+            }
+            .cta-section h2 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="glow-blob glow-1"></div>
+    <div class="glow-blob glow-2"></div>
+
+    <header>
+        <div class="nav-container">
+            <img src="favicon.png" alt="Studify.AI Logo" class="logo" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span style="display:none; font-weight:bold; color:var(--primary); font-size: 1.5rem;">Studify.AI</span>
+            
+            <nav class="nav-links">
+                <a href="#about" class="anchor">О проекте</a>
+                <a href="#features" class="anchor">Возможности</a>
+                <a href="#audience" class="anchor">Для кого</a>
+                <a href="#benefits" class="anchor">Преимущества</a>
+                <a href="#cta" class="anchor">Начать</a>
+                <a href="https://studify-ai.onrender.com" class="btn btn-primary">Открыть приложение</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-text-block">
+                <h1>
+                    <img src="favicon.png" alt="Лого" style="width: 48px; height: 48px; border-radius: 12px; vertical-align: middle;"> 
+                    Studify.AI – ИИ для учебы студентов Казахстана
+                </h1>
+                <p class="subtitle">Интеллектуальная платформа с интегрированным искусственным интеллектом. Помогает писать конспекты, разбирать сложные темы и готовиться к экзаменам быстрее.</p>
+                <p class="additional-text">Работает на русском и казахском языках. Создано специально для студентов колледжей и вузов РК.</p>
+                <div class="hero-buttons">
+                    <a href="#cta" class="btn btn-primary">Начать бесплатно</a>
+                </div>
+            </div>
+            <div class="hero-image-block">
+                <img src="ui.png" alt="Интерфейс приложения" style="width: 100%; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+            </div>
+        </section>
+
+        <section id="about">
+            <div class="about-content">
+                <div class="about-image">
+                    <img src="edu.jpg" alt="Студент учится" style="width: 100%; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                </div>
+                <div class="about-text">
+                    <h2>Что такое Studify.AI?</h2>
+                    <p>Studify.AI – это онлайн-платформа с интегрированным ИИ, разработанная для студентов Казахстана. Сервис помогает структурировать учебный материал, объяснять сложные темы простым языком и экономить время на подготовке к занятиям.</p>
+                    <p>Мы создаем удобный цифровой инструмент, который объединяет интеллектуальный поиск, генерацию конспектов и помощь в учебе в одном интерфейсе.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="features">
+            <h2>Возможности платформы</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="icon-placeholder">💡</div>
+                    <h3>Объяснение тем</h3>
+                    <p>Объяснение сложных концепций и тем простым и понятным языком.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-placeholder">📝</div>
+                    <h3>Конспекты</h3>
+                    <p>Автоматическая генерация структурированных конспектов по вашим материалам.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-placeholder">💻</div>
+                    <h3>Помощь с кодом</h3>
+                    <p>Поддержка в написании кода и решении технических заданий.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-placeholder">🎓</div>
+                    <h3>Подготовка к экзаменам</h3>
+                    <p>Эффективные инструменты для быстрого повторения и подготовки к сессии.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="icon-placeholder">🌍</div>
+                    <h3>Двуязычность</h3>
+                    <p>Полная поддержка работы на русском и казахском языках.</p>
+                </div>
+            </div>
+        </section>
+
+        <section id="audience">
+            <h2>Для студентов Казахстана</h2>
+            <p>Studify.AI ориентирован на студентов вузов и колледжей Республики Казахстан. Платформа учитывает языковую специфику и образовательную систему страны.</p>
+            <p>Подходит для:</p>
+            <ul class="styled-list">
+                <li>Для всех студентов</li>
+                <li>Региональных колледжей</li>
+                <li>ИТ-направлений</li>
+            </ul>
+        </section>
+
+        <section id="benefits">
+            <h2>Почему выбирают Studify.AI?</h2>
+            <ul class="styled-list">
+                <li>Экономия времени на рутинных задачах</li>
+                <li>Четкие и структурированные ответы от ИИ</li>
+                <li>Удобный, не перегруженный интерфейс</li>
+                <li>Бесплатный старт для каждого студента</li>
+            </ul>
+        </section>
+
+        <section id="cta">
+            <div class="cta-section">
+                <h2>Начните использовать Studify.AI уже сегодня</h2>
+                <a href="https://studify-app-yfu4.onrender.com" class="btn btn-white">Открыть приложение</a>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="logo-footer">Studify.AI</div>
+        <p>Интеллектуальный инструмент для учебы с интегрированным ИИ</p>
+        <p>&copy; 2026 Studify.ai</p>
+    </footer>
+
+</body>
+</html>
